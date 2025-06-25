@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Real Estate Deal Analyzer</title>
+</head>
+<body>
+  <h1>Real Estate Deal Analyzer</h1>
+  <form id="deal-form">
+    <label>Strategy:
+      <select name="strategy">
+        <option value="subto">Subject-To</option>
+        <option value="seller_finance">Seller Finance</option>
+      </select>
+    </label><br><br>
+
+    <label>Property Price: <input type="number" name="price" required /></label><br>
+    <label>Down Payment: <input type="number" name="down_payment" /></label><br>
+    <label>Interest Rate (%): <input type="number" name="interest_rate" /></label><br>
+    <label>Monthly Rent: <input type="number" name="monthly_rent" /></label><br>
+    <label>Monthly Expenses: <input type="number" name="monthly_expenses" /></label><br>
+    <label>Zip Code: <input type="text" name="zip_code" /></label><br><br>
+
+    <button type="submit">Analyze Deal</button>
+  </form>
+
+  <div id="result" style="margin-top:20px;"></div>
+
+  <script>
+    const form = document.getElementById('deal-form');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      for (let key in data) {
+        if (!isNaN(data[key])) data[key] = parseFloat(data[key]);
+      }
+
+      try {
+        const res = await fetch('https://real-estate-deal-analyzer.onrender.com/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+        resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+      } catch (err) {
+        resultDiv.innerHTML = 'Error analyzing deal.';
+      }
+    });
+  </script>
+</body>
+</html>
