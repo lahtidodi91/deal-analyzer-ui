@@ -1,1 +1,1 @@
-# deal-analyzer-ui-
+# deal-analyzer-ui
