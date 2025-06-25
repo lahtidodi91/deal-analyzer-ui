@@ -9,7 +9,8 @@
   <h1>Real Estate Deal Analyzer</h1>
   <form id="deal-form">
     <label>Strategy:
-      <select name="strategy">
+      <select name="strategy" required>
+        <option value="">-- Select --</option>
         <option value="subto">Subject-To</option>
         <option value="seller_finance">Seller Finance</option>
       </select>
@@ -18,6 +19,7 @@
     <label>Property Price: <input type="number" name="price" required /></label><br>
     <label>Down Payment: <input type="number" name="down_payment" /></label><br>
     <label>Interest Rate (%): <input type="number" name="interest_rate" /></label><br>
+    <label>Loan Term (Years): <input type="number" name="loan_term" /></label><br>
     <label>Monthly Rent: <input type="number" name="monthly_rent" /></label><br>
     <label>Monthly Expenses: <input type="number" name="monthly_expenses" /></label><br>
     <label>Zip Code: <input type="text" name="zip_code" /></label><br><br>
@@ -36,9 +38,10 @@
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
-      for (let key in data) {
-        if (!isNaN(data[key])) data[key] = parseFloat(data[key]);
-      }
+      // Convert numeric fields to floats
+      ['price', 'down_payment', 'interest_rate', 'loan_term', 'monthly_rent', 'monthly_expenses'].forEach(key => {
+        if (data[key]) data[key] = parseFloat(data[key]);
+      });
 
       try {
         const res = await fetch('https://real-estate-deal-analyzer.onrender.com/analyze', {
@@ -48,9 +51,17 @@
         });
 
         const result = await res.json();
-        resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+
+        if (res.ok) {
+          resultDiv.innerHTML = `
+            <h3>Analysis Result</h3>
+            <pre>${JSON.stringify(result, null, 2)}</pre>
+          `;
+        } else {
+          resultDiv.innerHTML = `<span style="color:red;">Error: ${result.detail?.[0]?.msg || 'Invalid input'}</span>`;
+        }
       } catch (err) {
-        resultDiv.innerHTML = 'Error analyzing deal.';
+        resultDiv.innerHTML = `<span style="color:red;">Error: ${err.message}</span>`;
       }
     });
   </script>
